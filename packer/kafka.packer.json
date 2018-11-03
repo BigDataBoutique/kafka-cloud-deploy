@@ -25,8 +25,8 @@
       "tags": {
         "ImageType": "kafka-packer-image"
       },
-      "spot_price_auto_product": "Linux/UNIX (Amazon VPC)",
-      "ena_support": true
+      "spot_price": "auto",
+      "spot_price_auto_product": "Linux/UNIX (Amazon VPC)"
     },
     {
       "type": "azure-arm",
