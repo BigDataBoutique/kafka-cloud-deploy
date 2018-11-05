@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export KAFKA_HOME=/opt/kafka/
+export KAFKA_HOME=/opt/kafka
 export KAFKA_CONFIG=/etc/kafka
 
 sudo mkdir -p /{etc,opt,data}/kafka
@@ -13,7 +13,7 @@ sudo find ${KAFKA_HOME}/{bin,config} -iname \*zookeeper\* -type f -delete
 sudo cp ${KAFKA_HOME}/config/* ${KAFKA_CONFIG}
 
 echo -e "export LOG_DIR=\"/var/log/kafka\"\nexport KAFKA_DEBUG=\"\"\nexport KAFKA_HEAP_OPTS=\"-Xmx\$(/usr/bin/awk '/MemTotal/{m=\$2*.65;print int(m)\"k\"}' /proc/meminfo) -Xms\$(/usr/bin/awk '/MemTotal/{m=\$2*.65;print int(m)\"k\"}' /proc/meminfo)\"" | sudo tee ${KAFKA_HOME}/bin/kafka-env.sh > /dev/null
-sudo sed -i -r -e '/^base_dir/a \\\\nif [ -f ${base_dir}/kafka-env.sh ]; then\\n  . ${base_dir}/kafka-env.sh\\nfi' ${KAFKA_HOME}/bin/kafka-server-start.sh
+sudo sed -i -r -e '/^base_dir/a if [ -f ${base_dir}/kafka-env.sh ]; then . ${base_dir}/kafka-env.sh; fi' ${KAFKA_HOME}/bin/kafka-server-start.sh
 #sudo sed -i -r -e '/^log4j.rootLogger/i kafka.logs.dir=\\/var\\/log\\/kafka\\n' /srv/kafka/config/log4j.properties
 sudo sed -i -r -e 's/# *delete.topic.enable/delete.topic.enable/;/^delete.topic.enable/s/=.*/=true/' ${KAFKA_CONFIG}/server.properties
 sudo sed -i -r -e 's/# *listeners=/listeners=/;/^listeners=/s/=.*/=PLAINTEXT:\/\/0.0.0.0:9092/' ${KAFKA_CONFIG}/server.properties
@@ -26,6 +26,8 @@ sudo sed -i -r -e '/^receive.buffer.bytes/{h;s/=.*/=33554432/};${x;/^$/{s//recei
 sudo sed -i -r -e 's/# *compression.type/compression.type/;/^compression.type/s/=.*/=lz4/' ${KAFKA_CONFIG}/producer.properties
 sudo chown -R kafka:kafka /opt/kafka /etc/kafka /data/kafka /var/log/kafka
 
+sudo sed -i  -e "s~/srv/kafka/config~${KAFKA_CONFIG}~g" /tmp/kafka.service
+sudo sed -i  -e "s~/srv/kafka~${KAFKA_HOME}~g" /tmp/kafka.service
 sudo cp /tmp/kafka.service /lib/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl disable kafka.service

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export ZK_HOME=/opt/zookeeper/
+export ZK_HOME=/opt/zookeeper
 export ZK_CONFIG=/etc/zookeeper/zoo.cfg
 export ZK_CONFIG_LOG4J=/etc/zookeeper/log4j.properties
 
@@ -22,9 +22,12 @@ sudo sed -i -r -e 's/# *autopurge.purgeInterval/autopurge.purgeInterval/;/^autop
 sudo sed -i -r -e 's/# *log4j.appender.ROLLINGFILE.MaxFileSize/log4j.appender.ROLLINGFILE.MaxFileSize/;/^log4j.appender.ROLLINGFILE.MaxFileSize/s/=.*/=10MB/' ${ZK_CONFIG_LOG4J}
 sudo sed -i -r -e 's/# *log4j.appender.ROLLINGFILE.MaxBackupIndex/log4j.appender.ROLLINGFILE.MaxBackupIndex/;/^log4j.appender.ROLLINGFILE.MaxBackupIndex/s/=.*/=10/' ${ZK_CONFIG_LOG4J}
 echo "JVMFLAGS=\"\$JVMFLAGS -Xmx\$(/usr/bin/awk '/MemTotal/{m=\$2*.20;print int(m)\"k\"}' /proc/meminfo)\"" | sudo tee -a ${ZK_HOME}/conf/java.env > /dev/null
-echo -e 'ZOO_LOG4J_PROP=\"INFO,ROLLINGFILE\"\\nZOO_LOG_DIR=\"/var/log/zookeeper\"\\nZOOPIDFILE=\"/var/run/zookeeper/zookeeper.pid\"\\nZOOCFGDIR=\"/etc/zookeeper\"' | sudo tee -a ${ZK_HOME}/conf/zookeeper-env.sh > /dev/null
+echo -e 'ZOO_LOG4J_PROP="INFO,ROLLINGFILE"\nZOO_LOG_DIR="/var/log/zookeeper"\nZOOPIDFILE="/var/run/zookeeper/zookeeper.pid"\nZOOCFGDIR="/etc/zookeeper"' | sudo tee -a ${ZK_HOME}/conf/zookeeper-env.sh > /dev/null
 echo 1 | sudo tee /data/zookeeper/myid > /dev/null
 sudo chown -R zookeeper:zookeeper ${ZK_HOME} /data/zookeeper /etc/zookeeper /opt/zookeeper /var/log/zookeeper /var/run/zookeeper
+
+sudo sed -i  -e "s~/srv/zookeeper~${ZK_HOME}~g" /tmp/zookeeper.service
+sudo sed -i  -e "s~zoo.cfg~${ZK_CONFIG}~g" /tmp/zookeeper.service
 
 sudo cp /tmp/zookeeper.service /lib/systemd/system/
 sudo systemctl daemon-reload
