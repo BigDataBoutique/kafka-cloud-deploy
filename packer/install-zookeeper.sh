@@ -26,8 +26,10 @@ echo -e 'ZOO_LOG4J_PROP="INFO,ROLLINGFILE"\nZOO_LOG_DIR="/var/log/zookeeper"\nZO
 echo 1 | sudo tee /data/zookeeper/myid > /dev/null
 sudo chown -R zookeeper:zookeeper ${ZK_HOME} /data/zookeeper /etc/zookeeper /opt/zookeeper /var/log/zookeeper /var/run/zookeeper
 
-sudo sed -i  -e "s~/srv/zookeeper~${ZK_HOME}~g" /tmp/zookeeper.service
-sudo sed -i  -e "s~zoo.cfg~${ZK_CONFIG}~g" /tmp/zookeeper.service
+sudo chmod +x /tmp/zookeeper_update_configs.py
+sudo sed -i -e "s~__CONFIG_PATH__~${ZK_CONFIG}~g" /tmp/zookeeper_update_configs.py
+sudo sed -i -e "s~__ID_FILE_PATH__~/data/zookeeper/myid~g" /tmp/zookeeper_update_configs.py
+sudo cp /tmp/zookeeper_update_configs.py ${ZK_HOME}
 
 sudo cp /tmp/zookeeper.service /lib/systemd/system/
 sudo systemctl daemon-reload

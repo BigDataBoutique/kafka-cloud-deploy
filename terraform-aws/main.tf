@@ -73,7 +73,7 @@ resource "aws_security_group" "zookeeper_security_group" {
     from_port         = 2181
     to_port           = 2181
     protocol          = "tcp"
-    cidr_blocks       = ["0.0.0.0/0"] # TODO fix to only brokers IPs
+    security_groups   = ["${aws_security_group.broker_security_group.id}"]
   }
 
   # allow connections from other zookeepers in the cluster

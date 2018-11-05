@@ -1,11 +1,12 @@
 ### MANDATORY ###
 variable "kafka_cluster" {
   description = "Name of the kafka cluster"
-  default = "test_kafka_cluster"
+  default = "test_kafka"
 }
 
 variable "aws_region" {
   type = "string"
+  default = "us-east-1"
 }
 
 variable "vpc_id" {
@@ -38,12 +39,19 @@ variable "zookeeper_instance_type" {
   default = "t2.micro"
 }
 
+variable "separate_zookeeper" {
+  description = "Whether or not Zookeepers and Kafka brokers should run on different nodes"
+  default = "false"
+}
+
 variable "broker_count" {
-  default = "0"
+  description = "Number of Kafka broker nodes. When separate_zookeeper is false, this is the number of total nodes created"
+  default = "1"
 }
 
 variable "zookeeper_count" {
-  default = "0"
+  description = "Number of Zookeeper nodes. Is only used when separate_zookeeper is true"
+  default = "1"
 }
 
 variable "public_facing" {

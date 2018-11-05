@@ -2,22 +2,20 @@ data "template_file" "single_node_userdata_script" {
   template = "${file("${path.module}/../templates/user_data.sh")}"
 
   vars {
-    cloud_provider          = "aws"
-    security_groups         = "${aws_security_group.broker_security_group.id}"
-    availability_zones      = "${join(",", coalescelist(var.availability_zones, data.aws_availability_zones.available.names))}"
+    region                  = "${var.aws_region}"
     zookeeper               = "true"
     broker                  = "true"
+    zookeeper_count         = "${var.zookeeper_count}"
   }
 }
 
 resource "aws_launch_configuration" "single_node" {
-  // Only create if it's a single-node configuration
-  count = "${var.zookeeper_count == "0" && var.broker_count == "0" ? "1" : "0"}"
-
   name_prefix = "kafka-${var.kafka_cluster}-single-node"
   image_id = "${data.aws_ami.kafka.id}"
   instance_type = "${var.zookeeper_instance_type}"
-  security_groups = ["${aws_security_group.broker_security_group.id}","${aws_security_group.zookeeper_security_group.id}"]
+  security_groups = ["${concat(list(
+    aws_security_group.zookeeper_security_group.id,
+    aws_security_group.broker_security_group.id), var.additional_security_groups)}"]
   associate_public_ip_address = "${var.public_facing}"
   iam_instance_profile = "${aws_iam_instance_profile.kafka.id}"
   user_data = "${data.template_file.single_node_userdata_script.rendered}"
@@ -29,13 +27,12 @@ resource "aws_launch_configuration" "single_node" {
 }
 
 resource "aws_autoscaling_group" "single_node" {
-  // Only create if it's a single-node configuration
-  count = "${var.zookeeper_count == "0" && var.broker_count == "0" ? "1" : "0"}"
-
   name = "kafka-${var.kafka_cluster}-single-node"
-  min_size = "0"
-  max_size = "1"
-  desired_capacity = "${var.zookeeper_count == "0" && var.broker_count == "0" ? "1" : "0"}"
+
+  min_size         = "${var.separate_zookeeper == "false" ? var.broker_count : "0"}"
+  max_size         = "${var.separate_zookeeper == "false" ? var.broker_count : "0"}"
+  desired_capacity = "${var.separate_zookeeper == "false" ? var.broker_count : "0"}"
+
   default_cooldown = 30
   force_delete = true
   launch_configuration = "${aws_launch_configuration.single_node.id}"
@@ -60,6 +57,11 @@ resource "aws_autoscaling_group" "single_node" {
   tag {
     key = "Role"
     value = "single-node"
+    propagate_at_launch = true
+  }
+  tag {
+    key = "HasZookeeper"
+    value = "true"
     propagate_at_launch = true
   }
 

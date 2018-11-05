@@ -18,9 +18,9 @@ BASENAME=$(basename $0)
 __TS__=$(date +%Y%m%d%H%M%S)
 
 # Configuration files
-KAFKA_CONF="/srv/kafka/config/server.properties"
-KAFKA_CONSUMER_CONF="/srv/kafka/config/consumer.properties"
-KAFKA_ENV="/srv/kafka/bin/kafka-env.sh"
+KAFKA_CONF="/etc/kafka/server.properties"
+KAFKA_CONSUMER_CONF="/etc/kafka/consumer.properties"
+KAFKA_ENV="/opt/kafka/bin/kafka-env.sh"
 
 # Variables
 KAFKA_DISABLE=0

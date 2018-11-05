@@ -21,13 +21,12 @@ sudo sed -i -r -e 's/# *advertised.listeners/advertised.listeners/;/^advertised.
 sudo sed -i -r -e 's/# *socket.send.buffer.bytes/socket.send.buffer.bytes/;/^socket.send.buffer.bytes/s/=.*/=33554432/' ${KAFKA_CONFIG}/server.properties
 sudo sed -i -r -e 's/# *socket.receive.buffer.bytes/socket.receive.buffer.bytes/;/^socket.receive.buffer.bytes/s/=.*/=33554432/' ${KAFKA_CONFIG}/server.properties
 sudo sed -i -r -e 's/# *log.dirs/log.dirs/;/^log.dirs/s/=.*/=\/data\/kafka/' ${KAFKA_CONFIG}/server.properties
+sudo sed -i -r -e 's/broker.id=0/#broker.id=0/g' ${KAFKA_CONFIG}/server.properties
 sudo sed -i -r -e 's/# *group.id/group.id/;/^group.id/s/=.*/=kafka-mirror/' ${KAFKA_CONFIG}/consumer.properties
 sudo sed -i -r -e '/^receive.buffer.bytes/{h;s/=.*/=33554432/};${x;/^$/{s//receive.buffer.bytes=33554432/;H};x}' ${KAFKA_CONFIG}/consumer.properties
 sudo sed -i -r -e 's/# *compression.type/compression.type/;/^compression.type/s/=.*/=lz4/' ${KAFKA_CONFIG}/producer.properties
 sudo chown -R kafka:kafka /opt/kafka /etc/kafka /data/kafka /var/log/kafka
 
-sudo sed -i  -e "s~/srv/kafka/config~${KAFKA_CONFIG}~g" /tmp/kafka.service
-sudo sed -i  -e "s~/srv/kafka~${KAFKA_HOME}~g" /tmp/kafka.service
 sudo cp /tmp/kafka.service /lib/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl disable kafka.service
